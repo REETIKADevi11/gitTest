@@ -1,7 +1,7 @@
 import bcrypt
 import os
 import re
-import string 
+
 USER_DATA_FILE = "users.txt"
 # password hashing function
 def hash_password(plain_text_password):
@@ -26,7 +26,7 @@ def register_user(username, password):
                     return False 
     hashed_password = hash_password(password)
     with open(USER_DATA_FILE, "a") as f:
-        f.write(f"{username}, {hashed_password}\n")
+        f.write(f"{username},{hashed_password}\n")
     return True
 #implementation of user existance check
 def user_exists(username):
@@ -36,7 +36,8 @@ def user_exists(username):
         for line in f:
             username_exist = line.strip().split(",")[0]
             if username_exist == username:
-                return False 
+                return True
+    return False
             
 #implementation of user login
 def login_user(username, password):
@@ -46,9 +47,9 @@ def login_user(username, password):
         return False
     with open(USER_DATA_FILE, "r") as f:
         for user in f:
-             user_exist, user_password = user.strip().split(":")
+             user_exist, user_password = user.strip().split(",")
              if user_exist == username:
-                 if user_password ==password:
+                 if verify_password(password, user_password):
                      print("User found")
                      return True
                  else:
@@ -65,88 +66,63 @@ def validate_password(password):
     lowerCase = re.search("[a-z]", password)
     upperCase = re.search("[A-Z]", password)
     digit = re.search(r"\d",password)
-    character = re.search(f"[{re.escape(string.punctuation)}]",password)
-    if all ([lowerCase, upperCase, digit, character]):
+    
+    if all ([lowerCase, upperCase, digit]):
+        print("Strong password")
         return True
     else: 
         print("password should contain: LowerCase, UpperCase,Digit and Special character.\n")
-        return True
+        return False
     
+
+
 def display_menu():
-    print("\n" + "=" * 50)
-    print("  MULTI-DOMAIN INTELLIGENCE PLATFORM")
-    print("  Secure Authentication System")
-    print("="*50)
-    print("\n[1] Register a new user")
-    print("[2] Login")
-    print("[3] Exit")
-    print("-"*50)
-
+    print("Welcome to MULTI_DOMAIN INTELLIGENCE PLATFORM (Secure authentication system)\n")
+    print("Choose whether you want to:[1] Register" \
+    "                                :[2] Login" \
+    "                                :[3] Exit")
 def main():
-     print("\nWelcome to the Week 7 Authentication System!")
-    
-     while True:
-        display_menu()
-        choice = input("\nPlease select an option (1-3): ").strip()
-        
-        if choice == '1':
-            # Registration flow
-            print("\n--- USER REGISTRATION ---")
-            username = input("Enter a username: ").strip()
+        print("This is week 7 authentication system\n")
+        while True:
+            display_menu()
+            choice = input("\Please select an option(1-3): ").strip()
+
+            if choice == '1':
+                print("User Registration")
+                username = input("Enter a username: ")
+                password= input ("Enter a password: ")
+
+                valid_username = validate_username(username)
+                if valid_username == username:
+                    print("Valid")
+                else:
+                    print("Invalid")
+                    continue
+                if not validate_password(password):
+                    print("Incorrect")
+                    continue
+                password_confirm = input("Confirm password: ")
+                if password != password_confirm:
+                    print("Password does not match.")
+                    continue
+                register_user(username, password)
             
-            # Validate username
-            is_valid, error_msg = validate_username(username)
-            if not is_valid:
-                print(f"Error: {error_msg}")
-                continue
-            
-            password = input("Enter a password: ").strip()
-            is_valid, error_msg = validate_password(password)
-            if not is_valid:
-                print(f"Error: {error_msg}")
-                continue
-            
-            # Confirm password
-            password_confirm = input("Confirm password: ").strip()
-            if password != password_confirm:
-                print("Error: Passwords do not match.")
-                continue
-            
-            # Register the user
-            register_user(username, password)
-        
-        elif choice == '2':
-            # Login flow
-            print("\n--- USER LOGIN ---")
-            username = input("Enter your username: ").strip()
-            password = input("Enter your password: ").strip()
-            
-            # Attempt login
-            if login_user(username, password):
-                print("\nYou are now logged in.")
-                print("(In a real application, you would now access the d")
-                
-                # Optional: Ask if they want to logout or exit
-                input("\nPress Enter to return to main menu...")
-        
-        elif choice == '3':
-            # Exit
-            print("\nThank you for using the authentication system.")
-            print("Exiting...")
-            break
-        
-        else:
-            print("\nError: Invalid option. Please select 1, 2, or 3.")
+            elif choice == '2':
+                print("User Login")
+                username = input("Enter your username: \n")
+                password =input("Enter your password ")
+
+                if login_user(username , password):
+                    print("You have successfully logged in. ")
+
+            elif choice =='3':
+                print("Thank you for using the authentication system.")
+                print("Existing")
+                break
+            else:
+                print("Invalid option. please select 1, 2 or 3.")
+
 if __name__ == "__main__":
-   main()
-
-    
-
-
-    
-
-
-
-
+    main()
 
 
